@@ -6,7 +6,9 @@ This repository implements a desktop scientific curve-fitting application with a
 
 The primary architectural reference for this repository is:
 
-`docs/Curve_Fitting_Application_Architecture_Baseline_v1.4.pdf`
+`docs/Curve_Fitting_Application_Architecture_Baseline_v1.5.pdf`
+
+Version 1.5 supersedes the earlier baseline, including the former Parameter fit-state and Dataset construction contracts. Historical documents under `docs/old/` are not normative.
 
 Before implementing or modifying any module, read the relevant sections of that document and preserve the defined package boundaries, responsibilities, and dependency directions.
 
@@ -45,7 +47,9 @@ Unit tests mirror the production package structure under:
 
 Examples:
 
-- `src/curvefit/domain/parameter.py` -> `tests/unit/domain/test_parameter.py`
+- `src/curvefit/domain/parameter/parameter.py` -> `tests/unit/domain/parameter/test_parameter.py`
+- `src/curvefit/domain/data_series/data_series.py` -> `tests/unit/domain/data_series/test_data_series.py`
+- `src/curvefit/domain/dataset/dataset.py` -> `tests/unit/domain/dataset/test_dataset.py`
 - `src/curvefit/data/csv_loader.py` -> `tests/unit/data/test_csv_loader.py`
 - `src/curvefit/models/latex_parser.py` -> `tests/unit/models/test_latex_parser.py`
 - `src/curvefit/fitting/lmfit_engine.py` -> `tests/unit/fitting/test_lmfit_engine.py`
@@ -80,7 +84,9 @@ Modules under `src/curvefit/domain/` must not depend on:
 - GUI classes
 - concrete file loaders
 
-NumPy should only be introduced into a domain object where the architecture explicitly benefits from array semantics and the dependency has been accepted for that object.
+NumPy and SymPy are permitted in domain objects only where explicitly provided for by the v1.5 contracts. DataSeries owns canonical 2D float64 arrays; Dataset composes DataSeries and adds experimental semantics and metadata. Pandas must remain in the data layer.
+
+ModelDefinition stores symbolic_expressions, a numerical callable Y = F(X, theta), and an immutable model_id. LaTeX belongs to the input pipeline rather than mandatory ModelDefinition state. copy() creates a new model_id. ModelDefinition must not depend on fitting.ParameterMapper.
 
 ### GUI restrictions
 
@@ -109,6 +115,13 @@ The fitting engine must be accessed through an abstraction rather than directly 
 The initial concrete implementation is expected to use LMFIT/SciPy according to the baseline, but domain objects must not depend on LMFIT-specific parameter classes.
 
 Initial guesses, bounds, fixed/varying parameters, uncertainties, residuals, and fit statistics must remain explicit concepts in the application model.
+
+- Parameter contains only input configuration; it must not store fitted value or stderr, or expose fit-state reset methods. ParameterValidator does not validate fit_value or stderr.
+- FitEngine is an ABC with the contract fit(dataset: Dataset, model: ModelDefinition) -> FitResult. Parameters belong to ModelDefinition and are not passed separately.
+- ParameterMapper belongs to fitting and captures the current parameter configuration at the start of each fit. It must not write results into Parameter.
+- ParameterResult stores numerical parameter results. Immutable ModelSnapshot, ParameterSnapshot, and VariableSnapshot preserve the configuration used in each execution without live mutable references.
+- FitResult is an immutable historical execution with its own fit_id, model_snapshot, parameter_results, predicted_series, model_curve, residuals, covariance, metrics, status, and metadata. It has no partial clear operation.
+- ModelCurve composes DataSeries for presentation; predicted_series contains predictions at experimental inputs. Multiple FitResult objects may coexist for one Dataset.
 
 ## 7. Security and sensitive data
 
@@ -190,17 +203,16 @@ A module is not considered complete until:
 
 Unless a later architectural decision changes the sequence, prefer this order:
 
-1. `domain/parameter.py`
-2. `domain/dataset.py`
-3. `domain/fit_result.py`
-4. `domain/model.py`
-5. `domain/exceptions.py`
-6. data ingestion modules
-7. model registry and custom/LaTeX model parsing
-8. fitting engine
-9. application services
-10. plotting
-11. Tkinter GUI
-12. end-to-end integration
+1. domain validators, `domain/variable/`, and `domain/parameter/`
+2. `domain/data_series/` and `domain/dataset/`
+3. `domain/model_definition/`
+4. `domain/snapshots/`, `domain/parameter_result.py`, `domain/model_curve.py`, `domain/fit_result.py`, and `domain/exceptions.py`
+5. Model Engine: LaTeX parsing, ModelSymbolAnalyzer, parameter identification, NumericFunctionBuilder, and model registry
+6. fitting: FitEngine, ParameterMapper, LmfitEngine, statistics, and synthetic-data tests
+7. data ingestion modules
+8. application services
+9. plotting and structural Tkinter GUI
+10. end-to-end integration and comparison of multiple FitResult objects
+11. snapshot persistence, integrity validation, and polishing
 
 When implementing any item, create its corresponding tests in the mirrored `tests/unit/` directory at the same time.
