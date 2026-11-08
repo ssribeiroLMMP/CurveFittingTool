@@ -8,7 +8,7 @@ from curvefit.domain.parameter import ParameterValidator
 
 
 class TestSymbol:
-    """Tests for ParameterValidator.symbol()."""
+    """Check validation and normalization of mathematical symbols."""
 
     @pytest.mark.parametrize(
         ("value", "expected"),
@@ -27,6 +27,7 @@ class TestSymbol:
         value,
         expected,
     ) -> None:
+        """Check that supported atomic symbols are accepted and trimmed."""
         assert ParameterValidator.symbol(value) == expected
 
     @pytest.mark.parametrize(
@@ -43,6 +44,7 @@ class TestSymbol:
         self,
         value,
     ) -> None:
+        """Check that symbols containing only whitespace are rejected."""
         with pytest.raises(
             ValueError,
             match="symbol cannot be empty",
@@ -63,6 +65,7 @@ class TestSymbol:
         self,
         value,
     ) -> None:
+        """Check that expressions and compound text are not accepted as symbols."""
         with pytest.raises(
             ValueError,
             match="valid atomic mathematical symbol",
@@ -83,6 +86,7 @@ class TestSymbol:
         self,
         value,
     ) -> None:
+        """Check that values other than strings are rejected as symbols."""
         with pytest.raises(
             ValueError,
             match="symbol must be a string",
@@ -91,7 +95,7 @@ class TestSymbol:
 
 
 class TestName:
-    """Tests for ParameterValidator.name()."""
+    """Check validation and normalization of optional descriptive names."""
 
     @pytest.mark.parametrize(
         ("value", "expected"),
@@ -108,6 +112,7 @@ class TestName:
         value,
         expected,
     ) -> None:
+        """Check that names are preserved, trimmed, or left unspecified as expected."""
         assert ParameterValidator.name(value) == expected
 
     @pytest.mark.parametrize(
@@ -124,6 +129,7 @@ class TestName:
         self,
         value,
     ) -> None:
+        """Check that blank optional names normalize to None."""
         assert ParameterValidator.name(value) is None
 
     @pytest.mark.parametrize(
@@ -139,6 +145,7 @@ class TestName:
         self,
         value,
     ) -> None:
+        """Check that values other than strings or None are rejected as names."""
         with pytest.raises(
             ValueError,
             match="name must be a string or None",
@@ -147,7 +154,7 @@ class TestName:
 
 
 class TestBounds:
-    """Tests for ParameterValidator.bounds()."""
+    """Check validation and normalization of lower and upper bounds."""
 
     @pytest.mark.parametrize(
         ("minimum", "maximum", "expected"),
@@ -166,12 +173,14 @@ class TestBounds:
         maximum,
         expected,
     ) -> None:
+        """Check that ordered finite and infinite bounds are normalized to floats."""
         assert ParameterValidator.bounds(
             minimum,
             maximum,
         ) == expected
 
     def test_rejects_reversed_bounds(self) -> None:
+        """Check that a lower bound greater than the upper bound is rejected."""
         with pytest.raises(
             ValueError,
             match="min_value cannot be greater than max_value",
@@ -193,6 +202,7 @@ class TestBounds:
         minimum,
         maximum,
     ) -> None:
+        """Check that NaN is rejected in either bound position."""
         with pytest.raises(
             ValueError,
             match="cannot be NaN",
@@ -216,6 +226,7 @@ class TestBounds:
         minimum,
         maximum,
     ) -> None:
+        """Check that non-numeric values and booleans are rejected as bounds."""
         with pytest.raises(ValueError):
             ParameterValidator.bounds(
                 minimum,
@@ -224,7 +235,7 @@ class TestBounds:
 
 
 class TestInitialValue:
-    """Tests for ParameterValidator.initial_value()."""
+    """Check validation of the configured starting value."""
 
     @pytest.mark.parametrize(
         ("value", "minimum", "maximum", "expected"),
@@ -243,6 +254,7 @@ class TestInitialValue:
         maximum,
         expected,
     ) -> None:
+        """Check that finite starting values within the inclusive bounds are accepted."""
         assert ParameterValidator.initial_value(
             value,
             minimum,
@@ -260,6 +272,7 @@ class TestInitialValue:
         self,
         value,
     ) -> None:
+        """Check that starting values below or above the configured bounds are rejected."""
         with pytest.raises(
             ValueError,
             match="initial_value must be between",
@@ -281,6 +294,7 @@ class TestInitialValue:
         self,
         value,
     ) -> None:
+        """Check that infinite starting values are rejected even with infinite bounds."""
         with pytest.raises(
             ValueError,
             match="initial_value must be finite",
@@ -292,6 +306,7 @@ class TestInitialValue:
             )
 
     def test_rejects_nan_initial_value(self) -> None:
+        """Check that NaN is rejected as a starting value."""
         with pytest.raises(
             ValueError,
             match="initial_value cannot be NaN",
@@ -304,7 +319,7 @@ class TestInitialValue:
 
 
 class TestVary:
-    """Tests for ParameterValidator.vary()."""
+    """Check validation of the parameter variation flag."""
 
     @pytest.mark.parametrize(
         "value",
@@ -317,6 +332,7 @@ class TestVary:
         self,
         value,
     ) -> None:
+        """Check that both boolean values are accepted unchanged."""
         assert ParameterValidator.vary(value) is value
 
     @pytest.mark.parametrize(
@@ -332,6 +348,7 @@ class TestVary:
         self,
         value,
     ) -> None:
+        """Check that non-boolean values are rejected as variation flags."""
         with pytest.raises(
             ValueError,
             match="vary must be a boolean",
@@ -339,7 +356,7 @@ class TestVary:
             ParameterValidator.vary(value)
 
 class TestUnit:
-    """Tests for ParameterValidator.unit()."""
+    """Check validation of an optional parameter unit."""
 
     @pytest.mark.parametrize(
         ("value", "expected"),
@@ -356,6 +373,7 @@ class TestUnit:
         value,
         expected,
     ) -> None:
+        """Check that units are trimmed and blank or omitted units become None."""
         assert ParameterValidator.unit(value) == expected
 
     @pytest.mark.parametrize(
@@ -371,6 +389,7 @@ class TestUnit:
         self,
         value,
     ) -> None:
+        """Check that values other than strings or None are rejected as units."""
         with pytest.raises(
             ValueError,
             match="unit must be a string or None",
@@ -379,7 +398,9 @@ class TestUnit:
 
 
 class TestFitState:
+    """Check that the validator does not handle fitting results."""
 
     def test_does_not_validate_fit_values_or_uncertainties(self) -> None:
+        """Check that fit values and uncertainties have no validator methods."""
         assert not hasattr(ParameterValidator, "fit_value")
         assert not hasattr(ParameterValidator, "stderr")

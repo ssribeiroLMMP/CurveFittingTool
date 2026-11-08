@@ -8,9 +8,10 @@ from curvefit.domain.parameter import Parameter
 
 
 class TestConstruction:
-    """Tests for Parameter construction and default state."""
+    """Check that construction stores only parameter configuration."""
 
     def test_creates_parameter_with_defaults(self) -> None:
+        """Check that omitted options use their defaults and leave it unbounded."""
         parameter = Parameter(symbol="A")
 
         assert parameter.symbol == "A"
@@ -27,6 +28,7 @@ class TestConstruction:
         assert parameter.has_bounds is False
 
     def test_does_not_expose_fit_results_or_lifecycle_methods(self) -> None:
+        """Check that fit results and fit-state methods are absent from Parameter."""
         parameter = Parameter(symbol="A")
 
         assert not hasattr(parameter, "value")
@@ -36,6 +38,7 @@ class TestConstruction:
         assert not hasattr(parameter, "clear_fit_result")
 
     def test_creates_parameter_with_custom_configuration(self) -> None:
+        """Check that construction preserves the supplied parameter options."""
         parameter = Parameter(
             symbol=r"\mu",
             name="Viscosidade",
@@ -55,6 +58,7 @@ class TestConstruction:
         assert parameter.unit == "Pa.s"
 
     def test_normalizes_optional_text_fields(self) -> None:
+        """Check that surrounding whitespace is removed from the name and unit."""
         parameter = Parameter(
             symbol="k",
             name="  Taxa de decaimento  ",
@@ -65,6 +69,7 @@ class TestConstruction:
         assert parameter.unit == "1/s"
 
     def test_rejects_invalid_symbol(self) -> None:
+        """Check that a blank mathematical symbol is rejected."""
         with pytest.raises(
             ValueError,
             match="symbol cannot be empty",
@@ -72,6 +77,7 @@ class TestConstruction:
             Parameter(symbol="   ")
 
     def test_rejects_initial_value_outside_bounds(self) -> None:
+        """Check that construction rejects a starting value outside its bounds."""
         with pytest.raises(
             ValueError,
             match="initial_value must be between",
@@ -85,15 +91,17 @@ class TestConstruction:
 
 
 class TestIdentity:
-    """Tests for the immutable mathematical identity of Parameter."""
+    """Check that the mathematical symbol remains immutable."""
 
     def test_symbol_has_no_public_setter(self) -> None:
+        """Check that assigning a new symbol through the public property fails."""
         parameter = Parameter(symbol="A")
 
         with pytest.raises(AttributeError):
             parameter.symbol = "B"
 
     def test_symbol_is_preserved_after_configuration(self) -> None:
+        """Check that changing configuration does not change the symbol."""
         parameter = Parameter(symbol="A")
 
         parameter.configure(
@@ -105,9 +113,10 @@ class TestIdentity:
 
 
 class TestBounds:
-    """Tests for derived parameter bound state."""
+    """Check how configured bounds determine the derived bounded state."""
 
     def test_has_bounds_is_false_for_unbounded_parameter(self) -> None:
+        """Check that infinite bounds do not count as constraints."""
         parameter = Parameter(symbol="A")
 
         assert parameter.has_bounds is False
@@ -125,6 +134,7 @@ class TestBounds:
         minimum,
         maximum,
     ) -> None:
+        """Check that any finite lower or upper bound marks the parameter bounded."""
         parameter = Parameter(
             symbol="A",
             min_value=minimum,
@@ -135,9 +145,10 @@ class TestBounds:
 
 
 class TestConfigure:
-    """Tests for complete Parameter reconfiguration."""
+    """Check complete configuration replacement and validation."""
 
     def test_configure_replaces_complete_configuration(self) -> None:
+        """Check that configure replaces every option while preserving identity."""
         parameter = Parameter(
             symbol="A",
             name="Old name",
@@ -166,6 +177,7 @@ class TestConfigure:
         assert parameter.unit == "Pa"
 
     def test_configure_without_arguments_restores_defaults(self) -> None:
+        """Check that calling configure without options restores all defaults."""
         parameter = Parameter(
             symbol="k",
             name="Taxa",
@@ -187,6 +199,7 @@ class TestConfigure:
         assert parameter.unit is Parameter.DEFAULT_UNIT
 
     def test_omitted_values_use_defaults_not_previous_values(self) -> None:
+        """Check that omitted options reset to defaults rather than retain old values."""
         parameter = Parameter(
             symbol="A",
             name="Amplitude",
@@ -209,6 +222,7 @@ class TestConfigure:
         assert parameter.unit is None
 
     def test_failed_configuration_preserves_previous_state(self) -> None:
+        """Check that invalid options raise an error without changing configuration."""
         parameter = Parameter(
             symbol="A",
             name="Amplitude",
@@ -235,9 +249,10 @@ class TestConfigure:
 
 
 class TestCopy:
-    """Tests for independent Parameter copies."""
+    """Check that copied parameters retain configuration independently."""
 
     def test_copy_preserves_configuration(self) -> None:
+        """Check that a copy has equal configuration but is a distinct object."""
         parameter = Parameter(
             symbol=r"\mu",
             name="Viscosidade",
@@ -254,6 +269,7 @@ class TestCopy:
         assert copied is not parameter
 
     def test_copy_is_independent_from_original(self) -> None:
+        """Check that reconfiguring a copy leaves the original unchanged."""
         parameter = Parameter(
             symbol="A",
             name="Amplitude",
@@ -274,9 +290,10 @@ class TestCopy:
 
 
 class TestEquality:
-    """Tests for Parameter equality semantics."""
+    """Check that equality compares parameter identity and configuration."""
 
     def test_identical_parameters_are_equal(self) -> None:
+        """Check that separate parameters with matching options compare equal."""
         left = Parameter(
             symbol="A",
             name="Amplitude",
@@ -290,12 +307,14 @@ class TestEquality:
         assert left == right
 
     def test_different_symbols_are_not_equal(self) -> None:
+        """Check that parameters with different mathematical symbols compare unequal."""
         left = Parameter(symbol="A")
         right = Parameter(symbol="B")
 
         assert left != right
 
     def test_different_configuration_is_not_equal(self) -> None:
+        """Check that different initial values make otherwise matching parameters unequal."""
         left = Parameter(
             symbol="A",
             initial_value=1.0,
@@ -309,15 +328,17 @@ class TestEquality:
         assert left != right
 
     def test_comparison_with_other_type_is_false(self) -> None:
+        """Check that a Parameter does not compare equal to a string."""
         parameter = Parameter(symbol="A")
 
         assert parameter != "A"
 
 
 class TestRepresentation:
-    """Tests for developer-oriented Parameter representation."""
+    """Check the developer-oriented representation of a Parameter."""
 
     def test_repr_contains_parameter_configuration(self) -> None:
+        """Check that repr includes the symbol and configured options."""
         parameter = Parameter(
             symbol=r"\mu",
             name="Viscosidade",
