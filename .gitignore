@@ -1,2 +1,26 @@
-*.pyc
+# Python environments and generated files
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Test and tool output
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.uv-cache/
+tmp/
+output/
+*.log
+
+# Local secrets
 .env
+.env.*
+!.env.example
