@@ -151,6 +151,8 @@ Generated test reports, coverage reports, caches, temporary exports, local datab
 
 ## 9. Coding expectations
 
+Use English for source code identifiers, comments, and docstrings, and for Git-related text such as branch names, commit messages, and pull request titles and descriptions. Use plain language in comments to explain what the code does and why.
+
 Prefer:
 
 - small, cohesive classes;
