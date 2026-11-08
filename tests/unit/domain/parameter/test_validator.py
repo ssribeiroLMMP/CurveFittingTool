@@ -303,138 +303,6 @@ class TestInitialValue:
             )
 
 
-class TestFitValue:
-    """Tests for ParameterValidator.fit_value()."""
-
-    @pytest.mark.parametrize(
-        ("value", "minimum", "maximum", "expected"),
-        [
-            (0, 0, 10, 0.0),
-            (5, 0, 10, 5.0),
-            (10, 0, 10, 10.0),
-            (-2.5, -5, 5, -2.5),
-            (1.5, -inf, inf, 1.5),
-        ],
-    )
-    def test_accepts_valid_fit_values(
-        self,
-        value,
-        minimum,
-        maximum,
-        expected,
-    ) -> None:
-        assert ParameterValidator.fit_value(
-            value,
-            minimum,
-            maximum,
-        ) == expected
-
-    @pytest.mark.parametrize(
-        "value",
-        [
-            -1,
-            11,
-        ],
-    )
-    def test_rejects_fit_values_outside_bounds(
-        self,
-        value,
-    ) -> None:
-        with pytest.raises(
-            ValueError,
-            match="value must be between",
-        ):
-            ParameterValidator.fit_value(
-                value,
-                0,
-                10,
-            )
-
-    @pytest.mark.parametrize(
-        "value",
-        [
-            inf,
-            -inf,
-        ],
-    )
-    def test_rejects_infinite_fit_values(
-        self,
-        value,
-    ) -> None:
-        with pytest.raises(
-            ValueError,
-            match="value must be finite",
-        ):
-            ParameterValidator.fit_value(
-                value,
-                -inf,
-                inf,
-            )
-
-
-class TestStderr:
-    """Tests for ParameterValidator.stderr()."""
-
-    def test_accepts_none(self) -> None:
-        assert ParameterValidator.stderr(None) is None
-
-    @pytest.mark.parametrize(
-        ("value", "expected"),
-        [
-            (0, 0.0),
-            (0.1, 0.1),
-            (5, 5.0),
-        ],
-    )
-    def test_accepts_non_negative_finite_values(
-        self,
-        value,
-        expected,
-    ) -> None:
-        assert ParameterValidator.stderr(value) == expected
-
-    @pytest.mark.parametrize(
-        "value",
-        [
-            -1,
-            -0.001,
-        ],
-    )
-    def test_rejects_negative_values(
-        self,
-        value,
-    ) -> None:
-        with pytest.raises(
-            ValueError,
-            match="stderr cannot be negative",
-        ):
-            ParameterValidator.stderr(value)
-
-    @pytest.mark.parametrize(
-        "value",
-        [
-            inf,
-            -inf,
-        ],
-    )
-    def test_rejects_infinite_values(
-        self,
-        value,
-    ) -> None:
-        with pytest.raises(
-            ValueError,
-            match="stderr must be finite",
-        ):
-            ParameterValidator.stderr(value)
-
-    def test_rejects_nan(self) -> None:
-        with pytest.raises(
-            ValueError,
-            match="stderr cannot be NaN",
-        ):
-            ParameterValidator.stderr(nan)
-
-
 class TestVary:
     """Tests for ParameterValidator.vary()."""
 
@@ -469,8 +337,6 @@ class TestVary:
             match="vary must be a boolean",
         ):
             ParameterValidator.vary(value)
-
-
 
 class TestUnit:
     """Tests for ParameterValidator.unit()."""
@@ -510,3 +376,10 @@ class TestUnit:
             match="unit must be a string or None",
         ):
             ParameterValidator.unit(value)
+
+
+class TestFitState:
+
+    def test_does_not_validate_fit_values_or_uncertainties(self) -> None:
+        assert not hasattr(ParameterValidator, "fit_value")
+        assert not hasattr(ParameterValidator, "stderr")
