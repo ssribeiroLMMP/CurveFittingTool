@@ -218,3 +218,37 @@ Unless a later architectural decision changes the sequence, prefer this order:
 11. snapshot persistence, integrity validation, and polishing
 
 When implementing any item, create its corresponding tests in the mirrored `tests/unit/` directory at the same time.
+
+## 13. Git commit subjects
+
+Write commit subjects in English. Prefix each subject with exactly one of these tags, in brackets:
+
+- `[add]` — add a feature, component, code, or comment.
+- `[update]` — change or extend an existing feature or component.
+- `[fix]` — fix a bug or address an issue or review suggestion.
+- `[comment]` — add or revise comments or docstrings in existing code.
+- `[clean]` — remove unused code, comments, or files.
+
+Use the matching subject format:
+
+- `[add] <feature, component, or concise description of new code>`
+- `[update] <feature or component>: <concise description of the change>`
+- `[fix] <feature or component>: <issue, bug, or review suggestion>`
+- `[comment] <feature or component>: <concise description of the comment change>`
+- `[clean] <feature or component>`
+
+Keep subjects short and specific. Choose the tag according to the change's primary purpose.
+
+## 14. Git branch names
+
+Start each branch name with exactly one of these prefixes, followed by a concise name using the `/` separator:
+
+- `feature/` — develop a new feature.
+- `update/` — change or extend an existing feature or specification.
+- `fix/` — fix a bug or address a review suggestion.
+- `doc/` — document code or update README files.
+- `clean/` — remove unused code, comments, or files.
+- `test/` — add or update automated unit or integration tests.
+- `temp/` — perform temporary studies or scripts that are usually not merged.
+
+Use a specific, concise branch name after the prefix, for example `test/parameter-contract`.
