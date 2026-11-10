@@ -1,0 +1,52 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Python 3.12.10 tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.10"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install locked dependencies
+        run: uv sync --locked --group dev
+
+      - name: Run tests
+        run: |
+          set +e
+          uv run pytest -q
+          test_status=$?
+          set -e
+
+          if [ "$test_status" -eq 5 ]; then
+            echo "::notice::No tests were collected; skipping test execution."
+            exit 0
+          fi
+
+          exit "$test_status"
