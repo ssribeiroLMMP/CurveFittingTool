@@ -10,6 +10,10 @@ The primary architectural reference for this repository is:
 
 Version 1.5 supersedes the earlier baseline, including the former Parameter fit-state and Dataset construction contracts. Historical documents under `docs/old/` are not normative.
 
+Accepted feature-specific architecture addenda supplement the baseline for
+their stated scope. Read both the relevant baseline sections and any applicable
+addenda before implementing a module.
+
 Before implementing or modifying any module, read the relevant sections of that document and preserve the defined package boundaries, responsibilities, and dependency directions.
 
 The architecture baseline is normative but evolutionary. If a technically justified implementation would materially diverge from the baseline:
@@ -107,6 +111,11 @@ The initial model scope is explicit regression of the form:
 `y = f(x, parameters...)`
 
 Do not silently add implicit-model fitting or unrelated symbolic capabilities without an architectural decision.
+
+The built-in model catalog and its editing workflow are specified in
+`docs/Predefined_Model_Catalog_Architecture.md`. Built-in model selection must
+create a fresh `ModelDefinition`; user-created model persistence is separate
+from the application-shipped catalog.
 
 ## 6. Fitting engine
 
