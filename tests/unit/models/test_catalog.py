@@ -17,9 +17,7 @@ def _make_model(name: str = "Identity") -> ModelDefinition:
         dependent_variables=Variable("y"),
         parameters=None,
         symbolic_expressions=x,
-        numeric_function=lambda independent_data, parameter_values: (
-            independent_data
-        ),
+        numeric_function=lambda *arguments: arguments[0],
     )
 
 
