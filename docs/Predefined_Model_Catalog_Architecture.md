@@ -44,8 +44,9 @@ catalog-owned `ModelDefinition` instances.
 ## Selection and editing workflow
 
 The GUI requests an available built-in model through an application service.
-The service uses the catalog to obtain a fresh definition and provides it to
-the editing workflow.
+`ModelService` provides discovery metadata and uses the catalog to obtain a
+fresh definition for the editing workflow. It does not expose catalog-owned
+mutable model instances.
 
 Editing a selected model never changes the catalog entry or another open
 model. Name and parameter configuration changes are made on the working
