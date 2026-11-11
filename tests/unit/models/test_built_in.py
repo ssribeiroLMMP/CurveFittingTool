@@ -11,6 +11,9 @@ def test_default_catalog_discovers_linear_and_polynomial_models() -> None:
         "linear",
         "polynomial_2",
         "polynomial_3",
+        "exponential",
+        "sine",
+        "cosine",
     )
 
 

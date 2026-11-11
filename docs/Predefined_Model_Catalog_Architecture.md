@@ -30,9 +30,12 @@ create its model definitions.
   instances.
 - A factory creates the symbolic expression and numerical callable together
   so that they describe the same model.
-- The package may depend on the domain model types and SymPy. It must not
-  depend on GUI classes, fitting engines, or concrete persistence and data
-  loading implementations.
+- Built-in numerical callables accept an `(n, 1)` NumPy input matrix and an
+  ordered one-dimensional parameter vector, and return an `(n, 1)` prediction
+  matrix.
+- The package may depend on the domain model types, SymPy, and NumPy for
+  vectorized numerical callables. It must not depend on GUI classes, fitting
+  engines, or concrete persistence and data loading implementations.
 
 The catalog exposes model metadata needed to list and select built-in models,
 such as the stable key and user-facing name. It does not expose mutable
