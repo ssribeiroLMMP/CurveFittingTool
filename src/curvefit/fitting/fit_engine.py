@@ -3,13 +3,9 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
-
 from curvefit.domain.dataset import Dataset
+from curvefit.domain.fit_result import FitResult
 from curvefit.domain.model_definition import ModelDefinition
-
-if TYPE_CHECKING:
-    from curvefit.domain.fit_result import FitResult
 
 
 class FitEngine(ABC):
@@ -20,7 +16,7 @@ class FitEngine(ABC):
         self,
         dataset: Dataset,
         model: ModelDefinition,
-    ) -> "FitResult":
+    ) -> FitResult:
         """Fit a mathematical model to a dataset.
 
         Parameters
